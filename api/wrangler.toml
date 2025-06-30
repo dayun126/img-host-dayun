@@ -1,0 +1,14 @@
+#部署命令wrangler deploy
+
+name = "img-host-api"
+main = "worker.js"
+compatibility_date = "2023-01-01"
+
+# 注意：不要在此文件中添加环境变量，这些信息会提交到GitHub
+# 请在Cloudflare Workers的Web界面中设置以下环境变量:
+# - GITHUB_REPO: GitHub仓库，格式为"用户名/仓库名"
+# - GITHUB_TOKEN: GitHub个人访问令牌
+# - ADMIN_PASSWORD: 管理员密码
+# - CF_API_TOKEN: Cloudflare API令牌 (用于清除缓存)
+# - CF_ZONE_ID: Cloudflare Zone ID
+# - CF_ACCOUNT_ID: Cloudflare 账户ID

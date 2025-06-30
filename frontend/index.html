@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Dayun">
+    <title>个人图床 - 大沄</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        #login-page {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0;
+            width: 100%;
+            padding-top: 25vh;
+        }
+        
+        #login-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 576px) {
+            #login-container {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="container-fluid">
+        <div id="login-container">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3>图床管理面板v1.1.8</h3>
+                </div>
+                <div class="card-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">管理员密码</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">登录</button>
+                        </div>
+                    </form>
+                    <div class="alert alert-danger mt-3 d-none" id="login-error">
+                        密码错误，请重试
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主页面 -->
+    <div id="main-page" class="container-fluid d-none">
+        <div class="row">
+            <!-- 左侧区域 - 标题和目录导航栏 -->
+            <div class="col-md-2">
+                <!-- 标题区域 -->
+                <div class="title-area mb-3 d-flex align-items-center">
+                    <img src="_dayun/img-host.webp" alt="图床管理面板" width="80" height="80" class="me-3">
+                    <h3 class="gradient-text mb-0">图床管理面板v1.1.8</h3>
+                </div>
+                
+                <!-- 目录导航栏 -->
+                <div class="list-group" id="folders-list">
+                    <a href="#" class="list-group-item list-group-item-action active" data-path="frontend">
+                        <i class="bi bi-folder"></i> 主目录
+                    </a>
+                    <!-- 文件夹列表将通过JS动态添加 -->
+                </div>
+            </div>
+
+            <!-- 右侧区域 - 顶部操作栏和图片展示区 -->
+            <div class="col-md-10">
+                <!-- 顶部操作栏 -->
+                <header class="p-3 mb-3 mt-3">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search-input" placeholder="搜索图片...">
+                                <span class="input-group-text search-icon" id="search-btn">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-auto ms-auto">
+                            <button id="upload-btn" class="btn btn-primary me-2">
+                                <i class="bi bi-cloud-upload"></i> 上传图片
+                            </button>
+                            <button id="delete-mode-btn" class="btn btn-danger me-2">
+                                <i class="bi bi-trash"></i> 删除图片
+                            </button>
+                            <button id="deploy-btn" class="btn btn-success me-2">
+                                <i class="bi bi-arrow-repeat"></i> 更新资源
+                            </button>
+                            <button id="purge-cache-btn" class="btn btn-warning me-2">
+                                <i class="bi bi-lightning"></i> 清理缓存
+                            </button>
+                            <button id="logout-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-right"></i> 退出
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- 悬浮提示 -->
+                <div id="floating-tip" class="floating-tip d-none">
+                    <i class="bi bi-info-circle me-2"></i>请点击图片进行勾选
+                </div>
+
+                <!-- 图片展示区 -->
+                <div class="row" id="images-container">
+                    <!-- 图片将通过JS动态添加 -->
+                </div>
+
+                <!-- 分页 -->
+                <nav aria-label="分页导航" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- 分页将通过JS动态添加 -->
+                    </ul>
+                </nav>
+                
+                <!-- 删除操作栏 -->
+                <div id="delete-action-bar" class="delete-action-bar d-none">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span id="selected-count">已选择 0 张图片</span>
+                            </div>
+                            <div class="col-auto">
+                                <button id="cancel-delete-btn" class="btn btn-outline-light me-2">
+                                    取消
+                                </button>
+                                <button id="confirm-delete-btn" class="btn btn-danger" disabled>
+                                    确认删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer mt-2 py-1">
+            <div class="container text-center">
+                <span class="text-muted small">© 2025 大沄</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 上传图片对话框 -->
+    <div class="modal fade" id="upload-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">上传图片</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="upload-form">
+                        <div class="mb-3">
+                            <label for="image-files" class="form-label">选择图片</label>
+                            <input type="file" class="form-control" id="image-files" accept=".jpg,.jpeg,.png,.gif,.webp,.avif" multiple required>
+                            <div class="form-text">支持格式：JPEG、PNG、GIF、WebP、AVIF</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="upload-path" class="form-label">上传位置</label>
+                            <select class="form-select" id="upload-path">
+                                <option value="frontend" selected>主目录</option>
+                                <!-- 文件夹选项将通过JS动态添加 -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="create-folder">
+                                <label class="form-check-label" for="create-folder">
+                                    创建新文件夹
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3 d-none" id="new-folder-group">
+                            <label for="new-folder-name" class="form-label">新文件夹名称</label>
+                            <input type="text" class="form-control" id="new-folder-name">
+                        </div>
+                    </form>
+                    <div class="progress d-none" id="upload-progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="upload-submit">
+                        <i class="bi bi-cloud-upload"></i> 上传
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片预览对话框 -->
+    <div class="modal fade" id="preview-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="preview-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="preview-image" class="img-fluid" src="" alt="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="copy-url-btn">
+                        <i class="bi bi-clipboard"></i> 复制链接
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除对话框 -->
+    <div class="modal fade" id="delete-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除图片 <span id="delete-filename"></span> 吗？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="delete-confirm">
+                        <i class="bi bi-trash"></i> 删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/gallery.js"></script>
+    <script src="js/upload.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
